@@ -46,45 +46,7 @@ const error = ref(null);
 // Spostiamo lo stile nel tag <style> del componente per evitare problemi con il build di produzione.
 const craneIcon = L.divIcon({
     html: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-          <g id="construction-crane">
-              <path class="crane-dark" d="M 25,88 L 45,88 L 43,83 L 27,83 Z" />
-              <rect class="crane-dark" x="20" y="88" width="30" height="3" rx="1" />
-              <line class="crane-line" x1="31" y1="83" x2="31" y2="25" />
-              <line class="crane-line" x1="39" y1="83" x2="39" y2="25" />
-              <line class="crane-line" x1="31" y1="80" x2="39" y2="70" />
-              <line class="crane-line" x1="39" y1="80" x2="31" y2="70" />
-              <line class="crane-line" x1="31" y1="65" x2="39" y2="55" />
-              <line class="crane-line" x1="39" y1="65" x2="31" y2="55" />
-              <line class="crane-line" x1="31" y1="50" x2="39" y2="40" />
-              <line class="crane-line" x1="39" y1="50" x2="31" y2="40" />
-              <line class="crane-line" x1="31" y1="35" x2="39" y2="25" />
-              <line class="crane-line" x1="39" y1="35" x2="31" y2="25" />
-              <rect class="crane-accent" x="40" y="26" width="10" height="10" rx="1.5" />
-              <path class="crane-dark" d="M 46,28 L 49,28 L 49,32 L 44,32 L 44,30 Z" opacity="0.8" />
-              <polygon class="crane-dark" points="31,25 39,25 35,10" />
-              <line class="crane-line" x1="10" y1="25" x2="85" y2="25" />
-              <line class="crane-line" x1="31" y1="20" x2="80" y2="25" />
-              <line class="crane-line" x1="39" y1="25" x2="45" y2="21" />
-              <line class="crane-line" x1="45" y1="21" x2="52" y2="25" />
-              <line class="crane-line" x1="52" y1="25" x2="60" y2="22" />
-              <line class="crane-line" x1="60" y1="22" x2="68" y2="25" />
-              <line class="crane-line" x1="68" y1="25" x2="75" y2="23" />
-              <line class="crane-line" x1="75" y1="23" x2="82" y2="25" />
-              <rect class="crane-dark" x="12" y="21" width="8" height="8" rx="1" />
-              <line class="crane-line" x1="35" y1="10" x2="15" y2="21" opacity="0.7" />
-              <line class="crane-line" x1="35" y1="10" x2="65" y2="23" opacity="0.7" />
-              <g id="hook-and-load">
-                  <rect class="crane-dark" x="62" y="25" width="6" height="3" />
-                  <line class="crane-line" x1="65" y1="28" x2="65" y2="48" style="stroke-width: 1;" />
-                  <polygon class="crane-accent" points="63,48 67,48 65,53" />
-                  <path d="M 65,53 Q 63,55 63,57 Q 65,59 66,57" fill="none" stroke="#2C3E50" stroke-width="1.2" stroke-linecap="round" />
-                  <rect class="crane-dark" x="58" y="60" width="14" height="10" rx="1" />
-                  <line class="crane-line" x1="65" y1="56" x2="59" y2="60" style="stroke-width: 0.8;" />
-                  <line class="crane-line" x1="65" y1="56" x2="71" y2="60" style="stroke-width: 0.8;" />
-              </g>
-          </g>
-      </svg>
+     
     `,
     className: 'crane-svg-icon', // Classe CSS per lo stile
     iconSize: [40, 40], // Dimensioni dell'icona in pixel
