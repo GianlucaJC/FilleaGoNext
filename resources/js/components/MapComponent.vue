@@ -110,7 +110,10 @@ const craneIcon = L.divIcon({
 // Funzione per caricare i dati dei cantieri dall'API
 const loadCantieri = async () => {
     try {
-        const response = await fetch('/api/cantieri');
+        // Rimuoviamo lo slash iniziale per rendere la chiamata relativa al percorso
+        // dell'applicazione, risolvendo il problema quando l'app non è nella root del dominio
+        // (es. http://localhost/progetto/public/api/cantieri)
+        const response = await fetch('api/cantieri');
         if (!response.ok) {
             throw new Error(`Il server ha risposto con stato: ${response.status}`);
         }
