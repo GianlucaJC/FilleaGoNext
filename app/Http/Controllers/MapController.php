@@ -20,32 +20,43 @@ class MapController extends Controller
      */
     public function elenco()
     {
-        $cantieri = Segnalazione::with('aziende')->select(
-            'id', 'cantiere', 'indirizzo_c', 'localita_c', 'provincia_c', 'inizio_lavori'
-        )
-        ->whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->orderBy('id', 'desc')
-        ->limit(200)
-        ->get();
+        $lat = 41.9027835; // Roma
+        $lon = 12.4963655; // Roma
+        $radius = 3; // km
+
+        $cantieri = Segnalazione::with('aziende')
+            ->selectRaw(
+                'id, cantiere, indirizzo_c, localita_c, provincia_c, inizio_lavori, ( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+                [$lat, $lon, $lat]
+            )
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->having('distance', '<', $radius)
+            ->orderBy('distance', 'asc')
+            ->get();
 
         return view('elenco', ['cantieri' => $cantieri]);
     }
 
     /**
-     * Fornisce i dati dei cantieri in formato JSON.
+     * Fornisce i dati dei cantieri in formato JSON, filtrati per prossimità.
      */
     public function getCantieri()
     {
-        // Seleziona solo le colonne necessarie e i cantieri con coordinate valide
-        $cantieri = Segnalazione::with('aziende')->select(
-            'id', 'cantiere', 'indirizzo_c', 'localita_c', 'latitude', 'longitude'
-        )
-        ->whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->orderBy('id', 'desc')
-        ->limit(200)
-        ->get();
+        $lat = 41.9027835; // Roma
+        $lon = 12.4963655; // Roma
+        $radius = 3; // km
+
+        $cantieri = Segnalazione::with('aziende')
+            ->selectRaw(
+                'id, cantiere, indirizzo_c, localita_c, latitude, longitude, ( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+                [$lat, $lon, $lat]
+            )
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->having('distance', '<', $radius)
+            ->orderBy('distance', 'asc')
+            ->get();
         return response()->json($cantieri);
     }
 }

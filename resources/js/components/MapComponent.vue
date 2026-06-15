@@ -6,7 +6,7 @@
         </div>
         <l-map
             v-model:zoom="zoom"
-            :center="[42.8333, 12.8333]"
+            :center="center"
             @ready="onMapReady"
         >
             <l-tile-layer
@@ -14,6 +14,14 @@
                 layer-type="base"
                 name="OpenStreetMap"
             ></l-tile-layer>
+
+            <l-circle
+                :lat-lng="center"
+                :radius="3000"
+                :color="'#d71e2b'"
+                :fill-color="'#d71e2b'"
+                :fill-opacity="0.2"
+            />
 
             <l-marker v-for="cantiere in cantieri" :key="cantiere.id" :lat-lng="[cantiere.latitude, cantiere.longitude]">
                 <l-popup>
@@ -35,9 +43,10 @@
 import { ref } from 'vue';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
-import { LMap, LTileLayer, LMarker, LPopup } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LMarker, LPopup, LCircle } from "@vue-leaflet/vue-leaflet";
 
-const zoom = ref(6);
+const zoom = ref(13);
+const center = ref([41.9028, 12.4964]); // Centro di Roma
 const cantieri = ref([]);
 const error = ref(null);
 

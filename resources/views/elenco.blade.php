@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="container mt-4">
-    <h1 class="mb-3">Elenco Cantieri Recenti</h1>
-    <p class="text-muted">Questa è una lista degli ultimi 200 cantieri inseriti con coordinate valide.</p>
+    <h1 class="mb-3">Cantieri a Roma (raggio 3km)</h1>
+    <p class="text-muted">Questa è una lista dei cantieri nel raggio di 3km dal centro di Roma, ordinati per vicinanza.</p>
 
     <div class="table-responsive">
         <table class="table table-striped table-hover">
