@@ -1,0 +1,24 @@
+/* c:\progetti\FilleaGoNext\resources\css\app.css */
+
+html, body {
+    height: 100vh; /* Usa l'altezza della viewport per evitare problemi di layout */
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+main {
+    flex-grow: 1; /* L'area del contenuto principale occupa lo spazio rimanente */
+    overflow-y: auto; /* Abilita lo scroll verticale per contenuti lunghi come l'elenco */
+}
+
+#map-container {
+    height: 100%;
+    width: 100%;
+}
