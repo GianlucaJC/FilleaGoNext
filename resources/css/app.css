@@ -22,3 +22,10 @@ main {
     height: 100%;
     width: 100%;
 }
+
+/* Stile personalizzato per il logo nell'header */
+.app-logo {
+    font-weight: 600;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+}

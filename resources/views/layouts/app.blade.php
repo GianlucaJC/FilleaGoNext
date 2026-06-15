@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Imposta il colore della UI del browser (barra degli indirizzi) sui dispositivi mobili -->
+    <meta name="theme-color" content="#d71e2b">
+
     <title>FilleaGO - Mappa Cantieri</title>
 
     <!-- Fonts -->
@@ -28,9 +31,9 @@
 <body class="antialiased">
     <div id="app">
         <header>
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #d71e2b;">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="{{ route('mappa') }}">FilleaGO</a>
+                    <a class="navbar-brand app-logo" href="{{ route('mappa') }}">FilleaGoNext</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
