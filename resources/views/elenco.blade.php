@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-4"> 
-    <h1 class="mb-3">Cantieri Attivi a Roma (raggio 3km)</h1>
+    <h1 class="mb-3">Cantieri Attivi a Roma (raggio 2km)</h1>
     <p class="text-muted">Questa è una lista dei 120 cantieri più vicini al centro di Roma (raggio 2km), attivi (con data fine lavori non più vecchia di 60 giorni).</p>
 
     <div class="table-responsive">

@@ -1,8 +1,11 @@
 <template>
-    <div style="height: 100%; width: 100%;">
+    <div style="height: 100%; width: 100%; position: relative;">
         <div v-if="error" class="error-overlay">
             <p><strong>Errore nel caricamento dei dati</strong></p>
             <p>{{ error }}</p>
+        </div>
+        <div v-if="loading" class="loading-overlay">
+            <div class="spinner"></div>
         </div>
         <l-map
             v-model:zoom="zoom"
@@ -16,8 +19,8 @@
             ></l-tile-layer>
 
             <l-circle
-                :lat-lng="center"
-                :radius="3000"
+                :lat-lng="romeCenter"
+                :radius="2000"
                 :color="'#d71e2b'"
                 :fill-color="'#d71e2b'"
                 :fill-opacity="0.2"
@@ -45,11 +48,13 @@ import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup, LCircle } from "@vue-leaflet/vue-leaflet";
 
-const zoom = ref(13); // Zoom più appropriato per una città
-const center = ref([41.9027835, 12.4963655]); // Centro di Roma
+const zoom = ref(6); // Inizia con una vista generale dell'Italia
+const center = ref([42.8333, 12.8333]); // Centro dell'Italia
+const romeCenter = [41.9027835, 12.4963655]; // Coordinate di Roma per il cerchio e l'animazione
 
 const cantieri = ref([]);
 const error = ref(null);
+const loading = ref(false);
 
 const loadCantieri = async () => {
     try {
@@ -63,6 +68,8 @@ const loadCantieri = async () => {
     } catch (e) {
         error.value = 'Impossibile connettersi al server per recuperare i dati dei cantieri.';
         console.error("Impossibile caricare i cantieri:", e);
+    } finally {
+        loading.value = false;
     }
 };
 
@@ -75,6 +82,13 @@ const onMapReady = (leafletMapObject) => {
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+
+    loading.value = true;
+
+    // Anima la mappa verso Roma
+    leafletMapObject.flyTo(romeCenter, 13, {
+        duration: 2.5 // Durata dell'animazione in secondi
     });
 
     setTimeout(() => {
@@ -98,5 +112,32 @@ const onMapReady = (leafletMapObject) => {
     border-radius: 5px;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Sopra la mappa ma sotto eventuali popup/modali */
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #d71e2b; /* Usa il colore del brand */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>
