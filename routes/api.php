@@ -20,4 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Rotta per ottenere i dati dei cantieri
-Route::get('/cantieri', [MapController::class, 'getCantieri'])->name('api.cantieri');
+// Temporaneamente spostata in web.php per debug
+// Route::get('/cantieri', [MapController::class, 'getCantieri'])->name('api.cantieri');
