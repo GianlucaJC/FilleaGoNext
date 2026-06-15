@@ -48,11 +48,11 @@ class MapController extends Controller
         return Segnalazione::with('aziende')
             ->selectRaw("*, {$haversine} AS distance", [$lat, $lon, $lat])
             ->whereNotNull('latitude')
-            ->whereNotNull('longitude') // Filtro per cantieri attivi
-            ->where('fine_lavori', '>=', now()->subDays(120))
+            ->whereNotNull('longitude')
+            ->where('fine_lavori', '>=', now()->subDays(60)) // Filtro per cantieri attivi (ultimi 60 giorni)
             ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius]) // Filtro per raggio
             ->orderBy('distance', 'asc') // Ordina per vicinanza a Roma
-            ->limit(200)
+            ->limit(120)
             ->get();
     }
 }
