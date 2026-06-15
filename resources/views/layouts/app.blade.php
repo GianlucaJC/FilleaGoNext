@@ -17,10 +17,8 @@
     <script>
         // Definisce un oggetto globale per le variabili dell'app
         window.App = {
-            // Costruisce l'URL di base in modo robusto, partendo da una rotta conosciuta ('mappa').
-            // Questo metodo è affidabile anche quando l'app è in una sottocartella e la
-            // configurazione del server potrebbe confondere altri helper.
-            baseUrl: '{{ substr(route('mappa'), 0, -strlen('/mappa')) }}'
+            // Passa l'URL completo e risolto per l'API dei cantieri.
+            cantieriApiUrl: '{{ route("api.cantieri") }}'
         };
     </script>
 

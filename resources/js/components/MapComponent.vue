@@ -110,9 +110,8 @@ const craneIcon = L.divIcon({
 // Funzione per caricare i dati dei cantieri dall'API
 const loadCantieri = async () => {
     try {
-        // Costruisce l'URL completo per la chiamata API usando l'URL di base fornito da Laravel.
-        // Questo garantisce che funzioni sia in locale che in produzione, anche in sottocartelle.
-        const response = await fetch(`${window.App.baseUrl}/api/cantieri`);
+        // Usa l'URL completo per l'API, fornito direttamente da Laravel.
+        const response = await fetch(window.App.cantieriApiUrl);
         if (!response.ok) {
             throw new Error(`Il server ha risposto con stato: ${response.status}`);
         }
