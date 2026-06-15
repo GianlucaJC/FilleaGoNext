@@ -17,7 +17,9 @@
     <script>
         // Definisce un oggetto globale per le variabili dell'app
         window.App = {
-            baseUrl: '{{ url('/') }}'
+            // Costruisce dinamicamente l'URL di base dalla richiesta HTTP.
+            // Questo metodo è più robusto di `url('/')` quando l'app è in una sottocartella.
+            baseUrl: '{{ rtrim(request()->getSchemeAndHttpHost() . request()->getBasePath(), '/') }}'
         };
     </script>
 
