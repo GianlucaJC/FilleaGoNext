@@ -20,44 +20,28 @@ class MapController extends Controller
      */
     public function elenco()
     {
-        $lat = 41.9027835; // Roma
-        $lon = 12.4963655; // Roma
-        $radius = 3; // km
-
-        $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
-
         $cantieri = Segnalazione::with('aziende')
-            ->selectRaw("*, {$haversine} AS distance",
-                [$lat, $lon, $lat]
-            )
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius])
-            ->orderBy('distance', 'asc')
+            ->where('fine_lavori', '>=', now()->subDays(60))
+            ->orderBy('id', 'desc')
+            ->limit(200)
             ->get();
 
         return view('elenco', ['cantieri' => $cantieri]);
     }
 
     /**
-     * Fornisce i dati dei cantieri in formato JSON, filtrati per prossimità.
+     * Fornisce i dati dei cantieri attivi in formato JSON.
      */
     public function getCantieri()
     {
-        $lat = 41.9027835; // Roma
-        $lon = 12.4963655; // Roma
-        $radius = 3; // km
-
-        $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
-
         $cantieri = Segnalazione::with('aziende')
-            ->selectRaw("*, {$haversine} AS distance",
-                [$lat, $lon, $lat]
-            )
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius])
-            ->orderBy('distance', 'asc')
+            ->where('fine_lavori', '>=', now()->subDays(60))
+            ->orderBy('id', 'desc')
+            ->limit(200)
             ->get();
         return response()->json($cantieri);
     }
