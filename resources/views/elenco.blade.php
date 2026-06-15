@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
-    <h1 class="mb-3">Elenco Cantieri Attivi</h1>
-    <p class="text-muted">Questa è una lista degli ultimi 200 cantieri attivi (con data fine lavori non più vecchia di 60 giorni).</p>
+<div class="container mt-4"> 
+    <h1 class="mb-3">Cantieri Attivi a Roma (raggio 3km)</h1>
+    <p class="text-muted">Questa è una lista dei 200 cantieri più vicini al centro di Roma, attivi (con data fine lavori non più vecchia di 60 giorni).</p>
 
     <div class="table-responsive">
         <table class="table table-striped table-hover">

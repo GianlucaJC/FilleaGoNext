@@ -15,6 +15,14 @@
                 name="OpenStreetMap"
             ></l-tile-layer>
 
+            <l-circle
+                :lat-lng="center"
+                :radius="3000"
+                :color="'#d71e2b'"
+                :fill-color="'#d71e2b'"
+                :fill-opacity="0.2"
+            />
+
             <l-marker v-for="cantiere in cantieri" :key="cantiere.id" :lat-lng="[cantiere.latitude, cantiere.longitude]">
                 <l-popup>
                     <b>{{ cantiere.cantiere }}</b><br>
@@ -35,10 +43,11 @@
 import { ref } from 'vue';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
-import { LMap, LTileLayer, LMarker, LPopup } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LMarker, LPopup, LCircle } from "@vue-leaflet/vue-leaflet";
 
-const zoom = ref(6);
-const center = ref([42.8333, 12.8333]); // Centro Italia
+const zoom = ref(13); // Zoom più appropriato per una città
+const center = ref([41.9027835, 12.4963655]); // Centro di Roma
+
 const cantieri = ref([]);
 const error = ref(null);
 

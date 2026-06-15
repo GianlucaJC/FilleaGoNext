@@ -20,11 +20,20 @@ class MapController extends Controller
      */
     public function elenco()
     {
+        $lat = 41.9027835; // Latitudine del centro di Roma
+        $lon = 12.4963655; // Longitudine del centro di Roma
+        $radius = 3; // Raggio in km
+
+        // Formula di Haversine per calcolare la distanza in km
+        $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
+
         $cantieri = Segnalazione::with('aziende')
+            ->selectRaw("*, {$haversine} AS distance", [$lat, $lon, $lat])
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->where('fine_lavori', '>=', now()->subDays(60))
-            ->orderBy('id', 'desc')
+            ->where('fine_lavori', '>=', now()->subDays(60)) // Filtro per cantieri attivi
+            ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius]) // Filtro per raggio
+            ->orderBy('distance', 'asc') // Ordina per vicinanza a Roma
             ->limit(200)
             ->get();
 
@@ -32,15 +41,24 @@ class MapController extends Controller
     }
 
     /**
-     * Fornisce i dati dei cantieri attivi in formato JSON.
+     * Fornisce i dati dei cantieri attivi nel raggio di 3km da Roma in formato JSON.
      */
     public function getCantieri()
     {
+        $lat = 41.9027835; // Latitudine del centro di Roma
+        $lon = 12.4963655; // Longitudine del centro di Roma
+        $radius = 3; // Raggio in km
+
+        // Formula di Haversine per calcolare la distanza in km
+        $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
+
         $cantieri = Segnalazione::with('aziende')
+            ->selectRaw("*, {$haversine} AS distance", [$lat, $lon, $lat])
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->where('fine_lavori', '>=', now()->subDays(60))
-            ->orderBy('id', 'desc')
+            ->where('fine_lavori', '>=', now()->subDays(60)) // Filtro per cantieri attivi
+            ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius]) // Filtro per raggio
+            ->orderBy('distance', 'asc') // Ordina per vicinanza a Roma
             ->limit(200)
             ->get();
         return response()->json($cantieri);
