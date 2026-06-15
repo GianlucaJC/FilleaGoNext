@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup } from "@vue-leaflet/vue-leaflet";
@@ -57,22 +57,21 @@ const loadCantieri = async () => {
 };
 
 const onMapReady = (leafletMapObject) => {
-    setTimeout(() => {
-        leafletMapObject.invalidateSize();
-    }, 0);
-    loadCantieri();
-};
-
-onMounted(() => {
     // Questo codice è necessario per correggere il percorso dell'icona di default di Leaflet
-    // quando si usa un bundler come Vite. Senza questo, i marker di default sarebbero invisibili.
+    // quando si usa un bundler come Vite. Lo eseguiamo qui per essere sicuri
+    // che le icone siano pronte prima di caricare i dati.
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     });
-});
+
+    setTimeout(() => {
+        leafletMapObject.invalidateSize();
+    }, 0);
+    loadCantieri();
+};
 </script>
 
 <style>
