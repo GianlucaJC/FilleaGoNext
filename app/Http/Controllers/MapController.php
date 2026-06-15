@@ -24,14 +24,15 @@ class MapController extends Controller
         $lon = 12.4963655; // Roma
         $radius = 3; // km
 
+        $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
+
         $cantieri = Segnalazione::with('aziende')
-            ->selectRaw(
-                'id, cantiere, indirizzo_c, localita_c, provincia_c, inizio_lavori, ( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+            ->selectRaw("*, {$haversine} AS distance",
                 [$lat, $lon, $lat]
             )
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->having('distance', '<', $radius)
+            ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius])
             ->orderBy('distance', 'asc')
             ->get();
 
@@ -47,14 +48,15 @@ class MapController extends Controller
         $lon = 12.4963655; // Roma
         $radius = 3; // km
 
+        $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
+
         $cantieri = Segnalazione::with('aziende')
-            ->selectRaw(
-                'id, cantiere, indirizzo_c, localita_c, latitude, longitude, ( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+            ->selectRaw("*, {$haversine} AS distance",
                 [$lat, $lon, $lat]
             )
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->having('distance', '<', $radius)
+            ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius])
             ->orderBy('distance', 'asc')
             ->get();
         return response()->json($cantieri);
