@@ -111,6 +111,7 @@ const craneIcon = L.divIcon({
 const loadCantieri = async () => {
     try {
         // Usa l'URL completo per l'API, fornito direttamente da Laravel.
+       alert(window.App.cantieriApiUrl)
         const response = await fetch(window.App.cantieriApiUrl);
         if (!response.ok) {
             throw new Error(`Il server ha risposto con stato: ${response.status}`);
