@@ -17,8 +17,9 @@
     <script>
         // Definisce un oggetto globale per le variabili dell'app
         window.App = {
-            // Passa l'URL completo e risolto per l'API dei cantieri.
-            cantieriApiUrl: '{{ route("api.cantieri") }}'
+            // Usiamo l'helper url() perché è più affidabile di route() nel generare
+            // URL corretti quando l'applicazione si trova in una sottocartella.
+            cantieriApiUrl: '{{ url("cantieri") }}'
         };
     </script>
 

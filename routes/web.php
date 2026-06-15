@@ -12,4 +12,4 @@ Route::get('/mappa', [MapController::class, 'index'])->name('mappa');
 Route::get('/elenco', [MapController::class, 'elenco'])->name('elenco');
 
 // Rotta API per i cantieri, spostata qui per debug
-Route::get('/api/cantieri', [MapController::class, 'getCantieri'])->name('api.cantieri');
+Route::get('/cantieri', [MapController::class, 'getCantieri']);
