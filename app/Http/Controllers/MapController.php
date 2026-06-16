@@ -16,15 +16,6 @@ class MapController extends Controller
     }
 
     /**
-     * Mostra la pagina con l'elenco dei cantieri.
-     */
-    public function elenco()
-    {
-        $cantieri = $this->getActiveCantieriInRome();
-        return view('elenco', ['cantieri' => $cantieri]);
-    }
-
-    /**
      * Fornisce i dati dei cantieri attivi nel raggio di 3km da Roma in formato JSON.
      */
     public function getCantieri(Request $request)
