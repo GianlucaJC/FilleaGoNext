@@ -19,6 +19,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Rotta per ottenere i dati dei cantieri
-// Temporaneamente spostata in web.php per debug
-// Route::get('/cantieri', [MapController::class, 'getCantieri'])->name('api.cantieri');
+// Rotta per ottenere i dati dei cantieri. Laravel la prefisserà automaticamente con /api
+Route::get('/cantieri', [MapController::class, 'getCantieri'])->name('api.cantieri');

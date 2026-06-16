@@ -12,4 +12,4 @@ Route::get('/mappa', [MapController::class, 'index'])->name('mappa');
 Route::get('/elenco', [MapController::class, 'elenco'])->name('elenco');
 
 // Rotta API per i cantieri, spostata qui per debug
-Route::get('/cantieri', [MapController::class, 'getCantieri'])->name('api.cantieri');
+// Questa rotta è stata spostata in routes/api.php per seguire le convenzioni di Laravel
