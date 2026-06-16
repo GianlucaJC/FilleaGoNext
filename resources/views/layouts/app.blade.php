@@ -20,10 +20,10 @@
     <script>
         // Definisce un oggetto globale per le variabili dell'app
         window.App = {
-            // In questo ambiente di produzione, l'helper route() non genera il percorso completo.
-            // Usiamo url() con uno slash iniziale per forzare la creazione di un URL assoluto
-            // a partire dalla root dell'applicazione, che includerà la sottocartella.
-            cantieriApiUrl: '{{ url("/cantieri") }}'
+            // Usiamo l'helper route() che è il modo più robusto in Laravel per generare URL,
+            // specialmente quando l'applicazione è servita da una sottocartella.
+            // Questo dovrebbe generare l'URL completo inclusa la sottocartella 'public'.
+            cantieriApiUrl: '{{ route("api.cantieri") }}'
         };
     </script>
 
