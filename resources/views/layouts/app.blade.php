@@ -46,6 +46,9 @@
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('elenco') ? 'active' : '' }}" href="{{ route('elenco') }}">Elenco Cantieri</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('vicinanze') ? 'active' : '' }}" href="{{ route('vicinanze') }}">Cantieri nelle mie vicinanze</a>
+                            </li>
                         </ul>
                     </div>
                 </div>

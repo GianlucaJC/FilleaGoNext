@@ -1,6 +1,6 @@
 <template>
     <div style="height: 100%; width: 100%; position: relative;">
-        <div v-if="error" class="error-overlay">
+        <div v-if="error" class="error-overlay" :style="{ top: loading ? '70px' : '20px' }">
             <p><strong>Errore nel caricamento dei dati</strong></p>
             <p>{{ error }}</p>
         </div>
@@ -19,7 +19,7 @@
             ></l-tile-layer>
 
             <l-circle
-                :lat-lng="romeCenter"
+                :lat-lng="currentCenter"
                 :radius="2000"
                 :color="'#d71e2b'"
                 :fill-color="'#d71e2b'"
@@ -43,22 +43,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineProps } from 'vue';
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup, LCircle } from "@vue-leaflet/vue-leaflet";
 
+const props = defineProps({
+    mode: { type: String, default: 'rome' } // 'rome' or 'geolocation'
+});
+
 const zoom = ref(6); // Inizia con una vista generale dell'Italia
-const center = ref([42.8333, 12.8333]); // Centro dell'Italia
+const center = ref([42.8333, 12.8333]); // Default: Centro dell'Italia
 const romeCenter = [41.9027835, 12.4963655]; // Coordinate di Roma per il cerchio e l'animazione
 
 const cantieri = ref([]);
 const error = ref(null);
 const loading = ref(false);
 
-const loadCantieri = async () => {
+const loadCantieri = async (lat = null, lon = null) => {
+    let apiUrl = window.App.cantieriApiUrl;
+    if (lat !== null && lon !== null) {
+        apiUrl += `?lat=${lat}&lon=${lon}`;
+    }
     try {
-        const response = await fetch(window.App.cantieriApiUrl);
+        const response = await fetch(apiUrl);
         if (!response.ok) {
             throw new Error(`Il server ha risposto con stato: ${response.status}`);
         }
@@ -72,6 +80,7 @@ const loadCantieri = async () => {
         loading.value = false;
     }
 };
+const currentCenter = ref(romeCenter); // This will hold the center for the circle and map animation
 
 const onMapReady = (leafletMapObject) => {
     // Questo codice è necessario per correggere il percorso dell'icona di default di Leaflet
@@ -85,16 +94,40 @@ const onMapReady = (leafletMapObject) => {
     });
 
     loading.value = true;
+    error.value = null; // Clear previous errors
 
-    // Anima la mappa verso Roma
-    leafletMapObject.flyTo(romeCenter, 13, {
-        duration: 2.5 // Durata dell'animazione in secondi
-    });
+    if (props.mode === 'geolocation' && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+                const userLocation = [userLat, userLon];
+                currentCenter.value = userLocation;
+                leafletMapObject.flyTo(userLocation, 13, { duration: 2.5 });
+                loadCantieri(userLat, userLon);
+            },
+            (geoError) => {
+                error.value = 'Geolocalizzazione fallita. Mostro i dati per Roma.';
+                console.error("Geolocation failed:", geoError);
+                currentCenter.value = romeCenter;
+                leafletMapObject.flyTo(romeCenter, 13, { duration: 2.5 });
+                loadCantieri(); // Load for Rome by default
+            }
+        );
+    } else {
+        if (props.mode === 'geolocation') {
+            error.value = 'Geolocalizzazione non supportata dal browser. Mostro i dati per Roma.';
+            console.warn("Geolocation is not supported by this browser. Falling back to Rome.");
+        }
+        // Default to Rome or if geolocation is not supported/requested
+        currentCenter.value = romeCenter;
+        leafletMapObject.flyTo(romeCenter, 13, { duration: 2.5 });
+        loadCantieri();
+    }
 
     setTimeout(() => {
         leafletMapObject.invalidateSize();
     }, 0);
-    loadCantieri();
 };
 </script>
 
