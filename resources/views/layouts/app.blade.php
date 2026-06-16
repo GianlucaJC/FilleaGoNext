@@ -20,9 +20,9 @@
     <script>
         // Definisce un oggetto globale per le variabili dell'app
         window.App = {
-            // Usiamo l'helper url() perché è più affidabile di route() nel generare
-            // URL corretti quando l'applicazione si trova in una sottocartella.
-            cantieriApiUrl: '{{ url("cantieri") }}'
+            // Usiamo l'helper route() che è il modo più robusto in Laravel per generare URL,
+            // specialmente quando l'applicazione è servita da una sottocartella.
+            cantieriApiUrl: '{{ route("api.cantieri") }}'
         };
     </script>
 
