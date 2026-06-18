@@ -11,6 +11,12 @@ const mapElement = document.getElementById('map-container');
 
 // Se l'elemento esiste, crea un'app Vue con MapComponent e montala, passando la prop 'mode'
 if (mapElement) {
-    const mode = mapElement.dataset.mode || 'rome'; // Leggi il valore di data-mode
-    createApp(MapComponent, { mode: mode }).mount('#map-container');
+    const props = {
+        mode: mapElement.dataset.mode || 'coords',
+        // Converte le coordinate in numeri, fornendo un default se non presenti
+        lat: parseFloat(mapElement.dataset.lat || '41.9027835'),
+        lon: parseFloat(mapElement.dataset.lon || '12.4963655'),
+        searchLocation: mapElement.dataset.searchLocation || 'Roma'
+    };
+    createApp(MapComponent, props).mount('#map-container');
 }

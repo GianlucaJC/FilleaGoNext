@@ -8,6 +8,26 @@
             width: 95% !important;
         }
     }
+    .autocomplete-suggestions {
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: white;
+        z-index: 1050; /* Sopra altri elementi */
+        width: 100%;
+    }
+    .autocomplete-suggestion {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    .autocomplete-suggestion:hover {
+        background-color: #f2f2f2;
+    }
+    .autocomplete-active {
+        background-color: #e9e9e9;
+    }
 </style>
 @endpush
 
@@ -15,12 +35,34 @@
 <div class="container mt-4 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Elenco Cantieri</h1>
-        @if(count($cantieri) > 0)
+        @if($cantieri->isNotEmpty())
             <span class="badge bg-primary rounded-pill">{{ count($cantieri) }} trovati</span>
         @endif
     </div>
+
+    {{-- Form di ricerca --}}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Cerca per Località</h5>
+            <form action="{{ route('elenco') }}" method="GET" class="row g-3 align-items-center">
+                <div class="col-md-10 position-relative">
+                    <label for="location" class="visually-hidden">Località</label>
+                    <input type="text" class="form-control" id="location" name="location" placeholder="Es. Milano, Napoli, Torino..." value="{{ $searchLocation ?? 'Roma' }}" autocomplete="off">
+                    <div id="autocomplete-container" class="autocomplete-suggestions"></div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Cerca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <p class="text-muted">
-        Elenco dei cantieri attivi negli ultimi 60 giorni nel raggio di 2km dal centro di Roma.
+        @if(isset($searchLocation) && strcasecmp($searchLocation, 'Roma') !== 0)
+            Elenco dei cantieri attivi negli ultimi 60 giorni nel raggio di 2km dal centro di <strong>{{ e($searchLocation) }}</strong>.
+        @else
+            Elenco dei cantieri attivi negli ultimi 60 giorni nel raggio di 2km dal centro di Roma.
+        @endif
     </p>
 
     {{-- Vista Tabella per Desktop (schermi grandi e superiori) --}}
@@ -116,5 +158,72 @@ function showDetails(cantiere) {
         focusConfirm: false,
     });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const locationInput = document.getElementById('location');
+    const suggestionsContainer = document.getElementById('autocomplete-container');
+    let activeSuggestion = -1;
+
+    let debounceTimer;
+
+    locationInput.addEventListener('input', function() {
+        const query = this.value;
+        clearTimeout(debounceTimer);
+
+        if (query.length < 3) {
+            suggestionsContainer.innerHTML = '';
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    activeSuggestion = -1;
+                    suggestionsContainer.innerHTML = '';
+                    data.forEach((item) => {
+                        const suggestionDiv = document.createElement('div');
+                        suggestionDiv.innerHTML = item.display_name;
+                        suggestionDiv.classList.add('autocomplete-suggestion');
+                        suggestionDiv.addEventListener('click', function() {
+                            locationInput.value = item.display_name;
+                            suggestionsContainer.innerHTML = '';
+                            locationInput.form.submit();
+                        });
+                        suggestionsContainer.appendChild(suggestionDiv);
+                    });
+                }).catch(error => console.error('Error fetching suggestions:', error));
+        }, 300); // Debounce di 300ms
+    });
+
+    locationInput.addEventListener('keydown', function(e) {
+        const items = suggestionsContainer.querySelectorAll('.autocomplete-suggestion');
+        if (items.length === 0) return;
+
+        if (e.keyCode === 40) { // Down
+            e.preventDefault();
+            activeSuggestion = (activeSuggestion + 1) % items.length;
+        } else if (e.keyCode === 38) { // Up
+            e.preventDefault();
+            activeSuggestion = (activeSuggestion - 1 + items.length) % items.length;
+        } else if (e.keyCode === 13) { // Enter
+            e.preventDefault();
+            if (activeSuggestion > -1) {
+                items[activeSuggestion].click();
+            } else {
+                locationInput.form.submit();
+            }
+            return;
+        }
+
+        items.forEach((item, index) => item.classList.toggle('autocomplete-active', index === activeSuggestion));
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!suggestionsContainer.contains(e.target) && e.target !== locationInput) {
+            suggestionsContainer.innerHTML = '';
+        }
+    });
+});
 </script>
 @endpush

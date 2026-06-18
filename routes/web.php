@@ -8,13 +8,9 @@ Route::get('/', function () {
     return redirect()->route('mappa');
 });
 
-Route::get('/mappa', function () {
-    return view('map', ['mode' => 'rome']);
-})->name('mappa');
+Route::get('/mappa', [MapController::class, 'map'])->name('mappa');
 
-Route::get('/vicinanze', function () {
-    return view('map', ['mode' => 'geolocation']);
-})->name('vicinanze');
+Route::get('/vicinanze', [MapController::class, 'mapVicinanze'])->name('vicinanze');
 Route::get('/elenco', [MapController::class, 'elenco'])->name('elenco');
 
 // Rotta API per i cantieri, spostata qui per debug

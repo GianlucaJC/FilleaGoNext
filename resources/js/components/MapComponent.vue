@@ -49,12 +49,14 @@ import L from 'leaflet';
 import { LMap, LTileLayer, LMarker, LPopup, LCircle } from "@vue-leaflet/vue-leaflet";
 
 const props = defineProps({
-    mode: { type: String, default: 'rome' } // 'rome' or 'geolocation'
+    mode: { type: String, required: true }, // 'coords' or 'geolocation'
+    lat: { type: Number, required: true },
+    lon: { type: Number, required: true },
+    searchLocation: { type: String, required: true }
 });
 
-const zoom = ref(6); // Inizia con una vista generale dell'Italia
-const center = ref([42.8333, 12.8333]); // Default: Centro dell'Italia
-const romeCenter = [41.9027835, 12.4963655]; // Coordinate di Roma per il cerchio e l'animazione
+const zoom = ref(6); // Inizia con una vista più ampia per mostrare l'effetto "volo"
+const center = ref([42.8333, 12.8333]); // Inizia dal centro Italia
 
 const cantieri = ref([]);
 const error = ref(null);
@@ -80,7 +82,7 @@ const loadCantieri = async (lat = null, lon = null) => {
         loading.value = false;
     }
 };
-const currentCenter = ref(romeCenter); // This will hold the center for the circle and map animation
+const currentCenter = ref([props.lat, props.lon]); // Il centro del cerchio e dell'animazione, basato sulle props
 
 const onMapReady = (leafletMapObject) => {
     // Questo codice è necessario per correggere il percorso dell'icona di default di Leaflet
@@ -102,27 +104,27 @@ const onMapReady = (leafletMapObject) => {
                 const userLat = position.coords.latitude;
                 const userLon = position.coords.longitude;
                 const userLocation = [userLat, userLon];
-                currentCenter.value = userLocation;
                 leafletMapObject.flyTo(userLocation, 13, { duration: 2.5 });
+                currentCenter.value = userLocation; // Aggiorna il centro del cerchio
                 loadCantieri(userLat, userLon);
             },
             (geoError) => {
                 error.value = 'Geolocalizzazione fallita. Mostro i dati per Roma.';
                 console.error("Geolocation failed:", geoError);
-                currentCenter.value = romeCenter;
-                leafletMapObject.flyTo(romeCenter, 13, { duration: 2.5 });
-                loadCantieri(); // Load for Rome by default
+                const fallbackLocation = [props.lat, props.lon];
+                leafletMapObject.flyTo(fallbackLocation, 13, { duration: 2.5 });
+                currentCenter.value = fallbackLocation;
+                loadCantieri(props.lat, props.lon);
             }
         );
     } else {
         if (props.mode === 'geolocation') {
-            error.value = 'Geolocalizzazione non supportata dal browser. Mostro i dati per Roma.';
-            console.warn("Geolocation is not supported by this browser. Falling back to Rome.");
+            error.value = 'Geolocalizzazione non supportata. Mostro i dati per la località cercata.';
         }
-        // Default to Rome or if geolocation is not supported/requested
-        currentCenter.value = romeCenter;
-        leafletMapObject.flyTo(romeCenter, 13, { duration: 2.5 });
-        loadCantieri();
+        const targetLocation = [props.lat, props.lon];
+        leafletMapObject.flyTo(targetLocation, 13, { duration: 2.5 });
+        currentCenter.value = targetLocation;
+        loadCantieri(props.lat, props.lon);
     }
 
     setTimeout(() => {
