@@ -30,6 +30,7 @@ class Segnalazione extends Model
     {
         return $this->hasMany(AziendaSegnalazione::class, 'id_segnalazione')
             ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
-            ->select('aziende_segnalazioni.*');
+            ->selectRaw('MAX(aziende_segnalazioni.id) as id, aziende_segnalazioni.id_segnalazione, aziende_segnalazioni.id_azienda, aziende_segnalazioni.denominazione')
+            ->groupBy('aziende_segnalazioni.id_segnalazione', 'aziende_segnalazioni.id_azienda', 'aziende_segnalazioni.denominazione');
     }
 }
