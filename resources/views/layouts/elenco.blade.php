@@ -88,11 +88,11 @@
                 </thead>
                 <tbody>
                     @forelse ($cantieri as $cantiere)
-                        <tr>
+                        <tr class="cantiere-row" data-lat="{{ $cantiere->latitude }}" data-lon="{{ $cantiere->longitude }}">
                             <td class="fw-bold">{{ $cantiere->cantiere }}</td>
                             <td>{{ $cantiere->indirizzo_c }}, {{ $cantiere->localita_c }}</td>
                             <td>
-                                <span class="badge bg-secondary font-monospace">{{ number_format($cantiere->distance, 2, ',', '.') }} km</span>
+                                <span class="badge bg-secondary font-monospace distance-badge">{{ number_format($cantiere->distance, 2, ',', '.') }} km</span>
                             </td>
                             <td>
                                 @if($cantiere->aziende->isNotEmpty())
@@ -123,14 +123,14 @@
     {{-- Vista a Card per Mobile (schermi medi e inferiori) --}}
     <div class="d-lg-none">
         @forelse ($cantieri as $cantiere)
-            <div class="card mb-3 shadow-sm">
+            <div class="card mb-3 shadow-sm cantiere-card" data-lat="{{ $cantiere->latitude }}" data-lon="{{ $cantiere->longitude }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ $cantiere->cantiere }}</h5>
                     <p class="card-text text-muted mb-2">
                         <i class="bi bi-geo-alt-fill"></i> {{ $cantiere->indirizzo_c }}, {{ $cantiere->localita_c }}
                     </p>
                     <p class="card-text mb-3">
-                        <span class="badge bg-secondary"><i class="bi bi-compass"></i> {{ number_format($cantiere->distance, 2, ',', '.') }} km di distanza</span>
+                        <span class="badge bg-secondary distance-badge"><i class="bi bi-compass"></i> {{ number_format($cantiere->distance, 2, ',', '.') }} km di distanza</span>
                     </p>
                     <button class="btn btn-primary w-100" onclick='showDetails(@json($cantiere))'>
                         Mostra Dettagli
@@ -241,6 +241,54 @@ document.addEventListener('DOMContentLoaded', function () {
             suggestionsContainer.innerHTML = '';
         }
     });
+
+    // Calcolo dinamico della distanza tramite GPS
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+
+            // Aggiorna le distanze per la tabella desktop
+            document.querySelectorAll('.cantiere-row').forEach(row => {
+                const lat = parseFloat(row.getAttribute('data-lat'));
+                const lon = parseFloat(row.getAttribute('data-lon'));
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    const dist = getHaversineDistance(userLat, userLon, lat, lon);
+                    const badge = row.querySelector('.distance-badge');
+                    if (badge) {
+                        badge.textContent = dist.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km';
+                    }
+                }
+            });
+
+            // Aggiorna le distanze per le card mobile
+            document.querySelectorAll('.cantiere-card').forEach(card => {
+                const lat = parseFloat(card.getAttribute('data-lat'));
+                const lon = parseFloat(card.getAttribute('data-lon'));
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    const dist = getHaversineDistance(userLat, userLon, lat, lon);
+                    const badge = card.querySelector('.distance-badge');
+                    if (badge) {
+                        badge.innerHTML = '<i class="bi bi-compass"></i> ' + dist.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' km di distanza';
+                    }
+                }
+            });
+        }, function (error) {
+            console.warn('Rilevamento posizione GPS non riuscito o negato. Utilizzo della distanza di fallback dal server.', error);
+        });
+    }
+
+    function getHaversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Raggio della Terra in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
 });
 </script>
 @endpush
