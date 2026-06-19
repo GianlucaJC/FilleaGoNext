@@ -107,7 +107,12 @@ class MapController extends Controller
             ->whereBetween('longitude', [$lon_min, $lon_max])
             ->where('fine_lavori', '>=', now()->subDays(60)) // Filtro per cantieri attivi (ultimi 60 giorni)
             ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius]) // 2. Filtro preciso sul cerchio
-            ->whereHas('aziende'); // Filtra per mostrare solo i cantieri con almeno un'azienda edile
+            ->whereExists(function ($q) {
+                $q->selectRaw(1)
+                  ->from('aziende_segnalazioni')
+                  ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
+                  ->whereColumn('aziende_segnalazioni.id_segnalazione', 'segnalazioni.id');
+            });
 
         if ($orderBy === 'azienda') {
             // Ordina in base al nome azienda
