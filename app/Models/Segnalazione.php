@@ -28,6 +28,8 @@ class Segnalazione extends Model
      */
     public function aziende()
     {
-        return $this->hasMany(AziendaSegnalazione::class, 'id_segnalazione');
+        return $this->hasMany(AziendaSegnalazione::class, 'id_segnalazione')
+            ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
+            ->select('aziende_segnalazioni.*');
     }
 }

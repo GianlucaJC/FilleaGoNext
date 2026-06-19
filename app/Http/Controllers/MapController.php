@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Segnalazione;
+use App\Models\AziendaSegnalazione;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -86,7 +87,7 @@ class MapController extends Controller
     /**
      * Metodo privato per recuperare i cantieri attivi in un dato raggio.
      */
-    private function getActiveCantieri($lat, $lon, $radius)
+    private function getActiveCantieri($lat, $lon, $radius, $orderBy = 'distance')
     {
         // Formula di Haversine per calcolare la distanza in km
         $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
@@ -97,7 +98,7 @@ class MapController extends Controller
         $lon_min = $lon - ($radius / (111.045 * cos(deg2rad($lat))));
         $lon_max = $lon + ($radius / (111.045 * cos(deg2rad($lat))));
 
-        return Segnalazione::with('aziende')
+        $query = Segnalazione::with('aziende')
             ->selectRaw("*, {$haversine} AS distance", [$lat, $lon, $lat])
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
@@ -106,9 +107,40 @@ class MapController extends Controller
             ->whereBetween('longitude', [$lon_min, $lon_max])
             ->where('fine_lavori', '>=', now()->subDays(60)) // Filtro per cantieri attivi (ultimi 60 giorni)
             ->whereRaw("{$haversine} < ?", [$lat, $lon, $lat, $radius]) // 2. Filtro preciso sul cerchio
-            ->orderBy('distance', 'asc') // Ordina per vicinanza al punto di ricerca
-            ->limit(120)
-            ->get();
+            ->whereHas('aziende'); // Filtra per mostrare solo i cantieri con almeno un'azienda edile
+
+        if ($orderBy === 'azienda') {
+            // Ordina in base al nome azienda
+            $query->orderBy(
+                AziendaSegnalazione::select('aziende.azienda')
+                    ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
+                    ->whereColumn('aziende_segnalazioni.id_segnalazione', 'segnalazioni.id')
+                    ->limit(1),
+                'asc'
+            );
+        } elseif ($orderBy === 'data_notifica') {
+            // Ordina in base a: aziende_segnalazioni.data_notifica desc, aziende.azienda
+            $query->orderBy(
+                AziendaSegnalazione::select('aziende_segnalazioni.data_notifica')
+                    ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
+                    ->whereColumn('aziende_segnalazioni.id_segnalazione', 'segnalazioni.id')
+                    ->orderBy('aziende_segnalazioni.data_notifica', 'desc')
+                    ->limit(1),
+                'desc'
+            )->orderBy(
+                AziendaSegnalazione::select('aziende.azienda')
+                    ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
+                    ->whereColumn('aziende_segnalazioni.id_segnalazione', 'segnalazioni.id')
+                    ->orderBy('aziende_segnalazioni.data_notifica', 'desc')
+                    ->limit(1),
+                'asc'
+            );
+        } else {
+            // Default: ordina per distanza
+            $query->orderBy('distance', 'asc');
+        }
+
+        return $query->limit(120)->get();
     }
 
     /**
@@ -118,6 +150,7 @@ class MapController extends Controller
     public function elenco(Request $request)
     {
         $searchLocation = $request->input('location', 'Roma');
+        $order = $request->input('order', 'distance'); // Ottiene l'ordinamento richiesto
         $lat = 41.9027835; // Default: Roma
         $lon = 12.4963655; // Default: Roma
         $radius = 2; // Raggio di ricerca in km
@@ -139,10 +172,11 @@ class MapController extends Controller
         }
 
         Log::debug('ELENCO: Esecuzione query con coordinate finali.', ['location' => $searchLocation, 'lat' => $lat, 'lon' => $lon]);
-        $cantieri = $this->getActiveCantieri($lat, $lon, $radius);
+        $cantieri = $this->getActiveCantieri($lat, $lon, $radius, $order);
         return view('layouts.elenco', [
             'cantieri' => $cantieri,
             'searchLocation' => $searchLocation,
+            'order' => $order,
         ]);
     }
 

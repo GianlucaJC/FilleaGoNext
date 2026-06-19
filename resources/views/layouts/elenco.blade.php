@@ -40,15 +40,23 @@
         @endif
     </div>
 
-    {{-- Form di ricerca --}}
+    {{-- Form di ricerca e ordinamento --}}
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <h5 class="card-title">Cerca per Località</h5>
-            <form action="{{ route('elenco') }}" method="GET" class="row g-3 align-items-center">
-                <div class="col-md-10 position-relative">
-                    <label for="location" class="visually-hidden">Località</label>
+            <h5 class="card-title mb-3">Cerca e Ordina i Cantieri</h5>
+            <form action="{{ route('elenco') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-6 position-relative">
+                    <label for="location" class="form-label fw-semibold">Località</label>
                     <input type="text" class="form-control" id="location" name="location" placeholder="Es. Milano, Napoli, Torino..." value="{{ $searchLocation ?? 'Roma' }}" autocomplete="off">
                     <div id="autocomplete-container" class="autocomplete-suggestions"></div>
+                </div>
+                <div class="col-md-4">
+                    <label for="order" class="form-label fw-semibold">Ordina per</label>
+                    <select class="form-select" id="order" name="order" onchange="this.form.submit()">
+                        <option value="distance" {{ ($order ?? 'distance') === 'distance' ? 'selected' : '' }}>Distanza (Default)</option>
+                        <option value="azienda" {{ ($order ?? '') === 'azienda' ? 'selected' : '' }}>Nome Azienda</option>
+                        <option value="data_notifica" {{ ($order ?? '') === 'data_notifica' ? 'selected' : '' }}>Data Notifica e Nome Azienda</option>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">Cerca</button>
