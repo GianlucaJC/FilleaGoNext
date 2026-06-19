@@ -81,6 +81,7 @@
                     <tr>
                         <th scope="col">Cantiere</th>
                         <th scope="col">Indirizzo</th>
+                        <th scope="col">Distanza</th>
                         <th scope="col">Aziende Coinvolte</th>
                         <th scope="col" class="text-end">Dettagli</th>
                     </tr>
@@ -90,6 +91,9 @@
                         <tr>
                             <td class="fw-bold">{{ $cantiere->cantiere }}</td>
                             <td>{{ $cantiere->indirizzo_c }}, {{ $cantiere->localita_c }}</td>
+                            <td>
+                                <span class="badge bg-secondary font-monospace">{{ number_format($cantiere->distance, 2, ',', '.') }} km</span>
+                            </td>
                             <td>
                                 @if($cantiere->aziende->isNotEmpty())
                                     {{ $cantiere->aziende->pluck('denominazione')->take(2)->implode(', ') }}
@@ -108,7 +112,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-4">Nessun cantiere trovato.</td>
+                            <td colspan="5" class="text-center py-4">Nessun cantiere trovato.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -122,7 +126,12 @@
             <div class="card mb-3 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">{{ $cantiere->cantiere }}</h5>
-                    <p class="card-text text-muted mb-2"><i class="bi bi-geo-alt-fill"></i> {{ $cantiere->indirizzo_c }}, {{ $cantiere->localita_c }}</p>
+                    <p class="card-text text-muted mb-2">
+                        <i class="bi bi-geo-alt-fill"></i> {{ $cantiere->indirizzo_c }}, {{ $cantiere->localita_c }}
+                    </p>
+                    <p class="card-text mb-3">
+                        <span class="badge bg-secondary"><i class="bi bi-compass"></i> {{ number_format($cantiere->distance, 2, ',', '.') }} km di distanza</span>
+                    </p>
                     <button class="btn btn-primary w-100" onclick='showDetails(@json($cantiere))'>
                         Mostra Dettagli
                     </button>
