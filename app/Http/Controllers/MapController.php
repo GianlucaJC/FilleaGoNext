@@ -87,7 +87,7 @@ class MapController extends Controller
     /**
      * Metodo privato per recuperare i cantieri attivi in un dato raggio.
      */
-    private function getActiveCantieri($lat, $lon, $radius, $orderBy = 'distance')
+    private function getActiveCantieri($lat, $lon, $radius, $orderBy = 'distance', $searchQuery = null)
     {
         // Formula di Haversine per calcolare la distanza in km
         $haversine = "( 6371 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) )";
@@ -113,6 +113,23 @@ class MapController extends Controller
                   ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
                   ->whereColumn('aziende_segnalazioni.id_segnalazione', 'segnalazioni.id');
             });
+
+        if ($searchQuery) {
+            $query->where(function ($q) use ($searchQuery) {
+                $q->where('cantiere', 'like', "%{$searchQuery}%")
+                  ->orWhere('indirizzo_c', 'like', "%{$searchQuery}%")
+                  ->orWhereExists(function ($q2) use ($searchQuery) {
+                      $q2->selectRaw(1)
+                         ->from('aziende_segnalazioni')
+                         ->join('aziende', 'aziende_segnalazioni.id_azienda', '=', 'aziende.p_iva')
+                         ->whereColumn('aziende_segnalazioni.id_segnalazione', 'segnalazioni.id')
+                         ->where(function ($q3) use ($searchQuery) {
+                             $q3->where('aziende_segnalazioni.denominazione', 'like', "%{$searchQuery}%")
+                                ->orWhere('aziende.azienda', 'like', "%{$searchQuery}%");
+                         });
+                  });
+            });
+        }
 
         if ($orderBy === 'azienda') {
             // Ordina in base al nome azienda
@@ -156,6 +173,7 @@ class MapController extends Controller
     {
         $searchLocation = $request->input('location', 'Roma');
         $order = $request->input('order', 'distance'); // Ottiene l'ordinamento richiesto
+        $searchQuery = $request->input('search'); // Filtro di ricerca testuale
         $lat = 41.9027835; // Default: Roma
         $lon = 12.4963655; // Default: Roma
         $radius = 2; // Raggio di ricerca in km
@@ -177,7 +195,16 @@ class MapController extends Controller
         }
 
         Log::debug('ELENCO: Esecuzione query con coordinate finali.', ['location' => $searchLocation, 'lat' => $lat, 'lon' => $lon]);
-        $cantieri = $this->getActiveCantieri($lat, $lon, $radius, $order);
+        $cantieri = $this->getActiveCantieri($lat, $lon, $radius, $order, $searchQuery);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'cantieri' => $cantieri,
+                'searchLocation' => $searchLocation,
+                'order' => $order,
+            ]);
+        }
+
         return view('layouts.elenco', [
             'cantieri' => $cantieri,
             'searchLocation' => $searchLocation,
